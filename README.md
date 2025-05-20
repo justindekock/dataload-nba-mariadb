@@ -3,6 +3,7 @@ Upon execution this project fetches game logs from the nba_api package, cleans t
 LOCAL DEPENDENCIES:
 - my package for interacting with mariadb is in /home/jdeto/py/dba-mariadb
 - - installed with 'pip install ../dba-mariadb'
+- - run 'pip install --upgrade .' in the dba repo, then 'pip install --upgrade ../dba-mariadb' in this repo to publish new changes to pip, then get those changes here
 
 HIGH LEVEL OVERVIEW (replicate for NBA, WNBA, G)
 - fetch.py: fetch team/player data from nba_api

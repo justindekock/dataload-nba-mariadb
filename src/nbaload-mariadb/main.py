@@ -3,9 +3,10 @@ from dbamdb import conn
 import fetch
 import clean
 
-#dbc = conn.Conn()
-
+dbc = conn.Conn()
+print(dbc.select('player', 'fetchall'))
 #dbc.show_db()
+
 
 game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
 
