@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=70.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nbaload-mariadb"
+dynamic = ["version"]
+description = "Load data fetched from npa_api into mariadb"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Justin DeKock", email = "jdekock17@gmail.com" }
+]
+
+dependencies = [
+    "certifi",
+    "charset-normalizer",
+    "dba-mariadb",
+    "dotenv",
+    "idna",
+    "mariadb",
+    "nba-api",
+    "numpy",
+    "packaging",
+    "pandas",
+    "pip",
+    "python-dateutil",
+    "python-dotenv",
+    "pytz",
+    "requests",
+    "setuptools",
+    "six",
+    "tzdata",
+    "urllib3"
+    ]
+
+
+
+
+
