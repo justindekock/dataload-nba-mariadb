@@ -1,0 +1,42 @@
+Metadata-Version: 2.4
+Name: nbaload-mariadb
+Version: 0.0.0
+Summary: Load data fetched from npa_api into mariadb
+Author-email: Justin DeKock <jdekock17@gmail.com>
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: certifi
+Requires-Dist: charset-normalizer
+Requires-Dist: dba-mariadb
+Requires-Dist: dotenv
+Requires-Dist: idna
+Requires-Dist: mariadb
+Requires-Dist: nba-api
+Requires-Dist: numpy
+Requires-Dist: packaging
+Requires-Dist: pandas
+Requires-Dist: pip
+Requires-Dist: python-dateutil
+Requires-Dist: python-dotenv
+Requires-Dist: pytz
+Requires-Dist: requests
+Requires-Dist: setuptools
+Requires-Dist: six
+Requires-Dist: tzdata
+Requires-Dist: urllib3
+Dynamic: license-file
+
+Upon execution this project fetches game logs from the nba_api package, cleans the data, and uses my dba-mariadb package to insert the data into a mariadb server hosted locally on a raspberry pi 5. 
+
+LOCAL DEPENDENCIES:
+- my package for interacting with mariadb is in /home/jdeto/py/dba-mariadb
+- - installed with 'pip install ../dba-mariadb'
+- - run 'pip install --upgrade .' in the dba repo, then 'pip install --upgrade ../dba-mariadb' in this repo to publish new changes to pip, then get those changes here
+
+HIGH LEVEL OVERVIEW (replicate for NBA, WNBA, G)
+- fetch.py: fetch team/player data from nba_api
+- clean.py: clean the data and subset into dataframes matching database tables
+- val.py: check whether the clean data already exists in the target database table
+
+# TODO - BUILD IN PLAY BY PLAY FETCH/CLEAN

@@ -1,0 +1,13 @@
+LICENSE
+README.md
+pyproject.toml
+src/nbaload-mariadb/__init__.py
+src/nbaload-mariadb/clean.py
+src/nbaload-mariadb/fetch.py
+src/nbaload-mariadb/main.py
+src/nbaload-mariadb/val.py
+src/nbaload_mariadb.egg-info/PKG-INFO
+src/nbaload_mariadb.egg-info/SOURCES.txt
+src/nbaload_mariadb.egg-info/dependency_links.txt
+src/nbaload_mariadb.egg-info/requires.txt
+src/nbaload_mariadb.egg-info/top_level.txt
