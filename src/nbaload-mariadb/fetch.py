@@ -1,7 +1,8 @@
 from time import sleep
 from nba_api.stats.endpoints import leaguegamefinder, commonallplayers, commonplayerinfo,\
     playerindex, teaminfocommon, playbyplayv3, playerprofilev2
-    
+
+from nba_api.stats.static.teams import teams
 import pandas as pd
 
 
@@ -79,11 +80,11 @@ def teams():
             
             
 def main():
-    # players = current_players()
+    players = current_players()
     # print(players)
     
-    test = teamplayerdashboard.TeamPlayerDashboard()#commonteamroster.CommonTeamRoster()
-    print(test)
+    #test = teamplayerdashboard.TeamPlayerDashboard()#commonteamroster.CommonTeamRoster()
+    #3print(test)
     
 if __name__=='__main__':
         main()
