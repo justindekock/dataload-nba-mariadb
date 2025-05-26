@@ -36,11 +36,12 @@ def main():
     max_attempts = 3
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
     
-    fetch.game_logs_batch(['05/01/2025', '05/20/2025'])
-    
+    df = run.game_logs_batch(['05/24/2025', '05/26/2025'], player_team='T')
+    print(df.head(50)) 
     # tdf = run.get_game_logs(game_date, 'T')
     # tm_data = clean.TeamData(tdf)
     # # run.inserts(tm_data.table_dfs)
+    
     
     # pdf = run.get_game_logs(game_date, 'P')
     # pl_data = clean.PlayerData(pdf, tm_data.tgame_df)
