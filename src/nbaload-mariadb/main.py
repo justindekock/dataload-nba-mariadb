@@ -35,9 +35,26 @@ def main():
     attempt = 0
     max_attempts = 3
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
+    dates = ['05/21/2025', '05/25/2025']
     
-    df = run.game_logs_batch(['05/24/2025', '05/26/2025'], player_team='T')
-    print(df.head(50)) 
+    print('Starting team fetch...')
+    batch_tm_df = run.game_logs_batch(dates, player_team='T')
+    batch_tm_data = clean.TeamData(batch_tm_df)
+    print('Team logs fetched and cleaned, starting DB insert...')
+    run.inserts(batch_tm_data.table_dfs)
+    
+    print('Starting player fetch...')
+    batch_pl_df = run.game_logs_batch(dates, player_team='P')
+    batch_pl_data = clean.PlayerData(batch_pl_df, batch_tm_data.tgame_df)
+    print('Player logs fetched and cleaned, starting DB insert...')
+    run.inserts(batch_pl_data.table_dfs)
+    
+    
+    # print(batch_tm_data.game_df)
+    
+    # run.manual_insert('game', batch_tm_data.game_df)
+    
+    # s
     # tdf = run.get_game_logs(game_date, 'T')
     # tm_data = clean.TeamData(tdf)
     # # run.inserts(tm_data.table_dfs)

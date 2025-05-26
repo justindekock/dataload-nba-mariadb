@@ -32,7 +32,7 @@ def game_logs_batch(dates, player_team='P'):
         
         dfs.append(df)
         print(df)    
-        sleep(3)
+        sleep(2)
     
     bigdf = pd.concat(dfs).reset_index(drop=True)
     
@@ -50,7 +50,7 @@ def check_all_lgs(game_date, pl_tm):
             print(f'Empty dataframe {lg}: {game_date}')
             continue
         dfs.append(df)
-        sleep(3) # 3 second timeout between each league fetch
+        sleep(2) # 3 second timeout between each league fetch
     
     if dfs:
         bigdf = pd.concat(dfs).reset_index(drop=True)
@@ -94,16 +94,17 @@ def check_for_games(game_date, lg):
     
 def inserts(table_dfs):
     
-    # database = conn.DBConn('dev')
-    # db_conn = database.connect()
-    # db_conn.begin()
+    db = conn.DBConn('dev')
     
-    for i, dict in enumerate(table_dfs):
+    for dict in table_dfs:
         table = list(dict.keys())[0]
         df = list(dict.values())[0]
         in_list = df_to_insert_lists(df)
-        print(f'Table {i+1}: {table}\nColumns: {len(in_list[0])}\nRows: {len(in_list[1])}\n')
+        print(f'Attempting to insert {len(in_list[1])} rows into {table}...')
+        db.insert(table, in_list[0], in_list[1])
     
-        
-    # db_conn.commit()
     
+def manual_insert(table, df):
+    in_list = df_to_insert_lists(df)
+    db = conn.DBConn('dev')
+    db.insert(table, in_list[0], in_list[1])
