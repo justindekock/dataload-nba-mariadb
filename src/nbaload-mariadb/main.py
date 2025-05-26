@@ -2,40 +2,15 @@ from datetime import datetime, timedelta
 from time import sleep
 import clean
 import run
-import fetch
-# def df_to_insert_lists(df):
-#     in_flds = tuple(df.columns.values)
-#     in_vals = []
-#     for r in range(df.shape[0]):
-#         vals = tuple(df.values[r])
-#         in_vals.append(vals)
-
-#     return tuple([in_flds, in_vals])
-
-
-# def check_for_games(game_date, lg):
-#     df = fetch.game_logs(game_date, 'T', lg)
-#     if not df:
-#         print(f'No {lg} games found for {game_date}')
-#         return pd.DataFrame()
-#     return df
-
-# def check_all_lgs(game_date, pl_tm):
-#     dfs = []
-#     lgs = ['NBA', 'WNBA', 'GNBA']
-#     for lg in lgs:
-#         df = fetch.game_logs(game_date, player_team=pl_tm, lg=lg)
-#         if not df.empty:
-#             dfs.append(df)
-        
-#     return dfs
 
 def main():
     timeout = 2
     attempt = 0
     max_attempts = 3
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    dates = ['05/21/2025', '05/25/2025']
+    dates = ['05/08/2025', '05/15/2025']
+    
+    run.fetch_insert_players('dev')
     
     print('Starting team fetch...')
     batch_tm_df = run.game_logs_batch(dates, player_team='T')

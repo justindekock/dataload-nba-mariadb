@@ -5,6 +5,19 @@ import pandas as pd
 from datetime import datetime, timedelta
 from dbamdb import conn
 
+# db = conn.DBConn('dev')
+# db.delete_temp_player()
+
+def fetch_insert_players(db = 'dev'):
+    players = fetch.get_players()
+    pl_ins_lists = df_to_insert_lists(players)
+    
+    db_conn = conn.DBConn(db)
+    db_conn.insert('player_temp', pl_ins_lists[0], pl_ins_lists[1])
+    print('Completed player insert/update, delaying then deleting temporary player records')
+    sleep(5)
+    db_conn.delete_temp_player()
+    
 def list_of_dates(dates):
     start_date = datetime.strptime(dates[0], '%m/%d/%Y')
     end_date = datetime.strptime(dates[1], '%m/%d/%Y')
@@ -67,13 +80,7 @@ def get_game_logs(game_date, pl_tm='T'):
     # combine the dataframes
     return pd.concat(dfs.copy()).reset_index(drop=True)
 
-def fetch_insert_players(db = 'dev'):
-    players = fetch.get_players()
-    pl_ins_lists = df_to_insert_lists(players)
-    
-    db_conn = conn.DBConn(db)
-    db_conn.insert('player_temp', pl_ins_lists[0], pl_ins_lists[1])
-    print('Completed player insert/update')
+
     
 # should move this to clean
 def df_to_insert_lists(df):
@@ -100,7 +107,7 @@ def inserts(table_dfs):
         table = list(dict.keys())[0]
         df = list(dict.values())[0]
         in_list = df_to_insert_lists(df)
-        print(f'Attempting to insert {len(in_list[1])} rows into {table}...')
+        print(f'Attempting to insert into {table}...')
         db.insert(table, in_list[0], in_list[1])
     
     
