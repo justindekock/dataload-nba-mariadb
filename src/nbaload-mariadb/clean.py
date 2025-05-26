@@ -45,7 +45,7 @@ class TeamData:
         
     def get_team_df(self):
         team_df = self.clean_df[['team_id', 'team', 'team_name', 'lg']].drop_duplicates()
-        self.table_dfs.append(team_df)
+        self.table_dfs.append({'team': team_df})
         return team_df
     def get_szn_df(self):
             
@@ -79,7 +79,7 @@ class TeamData:
             {'season_id': season_id, 'season': season, 'season_desc': season_desc, 
             'wseason': wseason, 'wseason_desc': wseason_desc}
             )
-        self.table_dfs.append(szn_df)
+        self.table_dfs.append({'season': szn_df})
         return szn_df
     
     def get_game_df(self):
@@ -115,7 +115,7 @@ class TeamData:
         game_df['ot'] = game_df['mins'].apply(get_ot)
         game_df = game_df[game_df['matchup'].str[4] == 'v'].reset_index() 
         game_df = game_df.drop(columns=['index', 'mins', 'team_id'])
-        self.table_dfs.append(game_df)
+        self.table_dfs.append({'game':game_df})
         return game_df
     
     def get_tgame_df(self):
@@ -129,22 +129,22 @@ class TeamData:
         tgame_df['pm'] = tgame_df['pm'].astype(int)
         tgame_df = tgame_df.rename(columns={'pm': 'diff'})
         tgame_df = tgame_df.drop(['mins'], axis=1)
-        self.table_dfs.append(tgame_df)
+        self.table_dfs.append({'t_game':tgame_df})
         return tgame_df
     
     def get_tbox_df(self):
         tbox_df = self.clean_df[['game_id', 'season_id', 'team_id', 'mins', 'pts', 'ast', 
            'reb', 'stl', 'blk', 'oreb', 'dreb', 'pm', 'tov', 'pf']].copy()
-        self.table_dfs.append(tbox_df)
+        self.table_dfs.append({'t_box':tbox_df})
         return tbox_df
     
     def get_tshtg_df(self):
         tshtg_df = self.clean_df[['game_id', 'season_id', 'team_id', 'fgm', 'fga', 'fg3m', 
            'fg3a', 'ftm', 'fta', 'fg_pct', 'fg3_pct', 'ft_pct']].copy() 
-        self.table_dfs.append(tshtg_df)
+        self.table_dfs.append({'t_shtg':tshtg_df})
         return tshtg_df
 
-class PlayerDataLgcy():
+class PlayerData():
     def __init__(self, raw_df, clean_team_df):
         if raw_df.empty:
             print(f'No game logs to clean')
@@ -155,6 +155,8 @@ class PlayerDataLgcy():
             self.clean_df = clean_raw_df(self.raw_df)
             self.player_df = self.get_player_df()
             self.pgame_df = self.get_pgame_df(clean_team_df)
+            self.pbox_df = self.get_pbox_df()
+            self.pshtg_df = self.get_pshtg_df()
     
     def print_dfs():
         pass
@@ -168,12 +170,18 @@ class PlayerDataLgcy():
         joined = joined.rename(columns={'pts_x': 'pts'})    
         cols = ['game_id', 'season_id', 'team_id', 'player_id', 'game_date', 
                 'matchup', 'mins', 'pts', 'diff', 'wl', 'loc', 'ot']
-        return joined[cols]
+        pgame_df = joined[cols]
+        self.table_dfs.append({'p_game':pgame_df})
+        return pgame_df
     
     def get_pbox_df(self):
-        return self.clean_df[['game_id', 'season_id', 'team_id', 'player_id', 'mins', 'pts', 'ast', 
+        pbox_df = self.clean_df[['game_id', 'season_id', 'team_id', 'player_id', 'mins', 'pts', 'ast', 
            'reb', 'stl', 'blk', 'oreb', 'dreb', 'pm', 'tov', 'pf']].copy() 
+        self.table_dfs.append({'p_box':pbox_df})
+        return pbox_df
     
     def get_pshtg_df(self):
-        return self.clean_df[['game_id', 'season_id', 'team_id', 'player_id', 'fgm', 'fga', 'fg3m', 
+        pshtg_df = self.clean_df[['game_id', 'season_id', 'team_id', 'player_id', 'fgm', 'fga', 'fg3m', 
            'fg3a', 'ftm', 'fta', 'fg_pct', 'fg3_pct', 'ft_pct']].copy() 
+        self.table_dfs.append({'p_shtg':pshtg_df})
+        return pshtg_df

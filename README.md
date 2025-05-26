@@ -1,5 +1,14 @@
 Upon execution this project fetches game logs from the nba_api package, cleans the data, and uses my dba-mariadb package to insert the data into a mariadb server hosted locally on a raspberry pi 5. 
 
+MODULES: 
+
+- fetch.py - uses the nba_api package to call the nba stats website and fetch data
+- clean.py - cleans team and player game log data. two classes, TeamData and PlayerData return dataframes formatted the same as my database tables
+- main.py - file that will be run nightly with a cron job
+- run.py - contains process flow functions
+- other.py - run other variations of the fetch functions
+
+
 LOCAL DEPENDENCIES:
 - my package for interacting with mariadb is in /home/jdeto/py/dba-mariadb
 - - installed with 'pip install ../dba-mariadb'

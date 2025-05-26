@@ -1,42 +1,65 @@
 from datetime import datetime, timedelta
 from time import sleep
-from dbamdb import conn
-import pandas as pd
-import fetch
 import clean
+import run
+import fetch
+# def df_to_insert_lists(df):
+#     in_flds = tuple(df.columns.values)
+#     in_vals = []
+#     for r in range(df.shape[0]):
+#         vals = tuple(df.values[r])
+#         in_vals.append(vals)
 
-def df_to_insert_lists(df):
-    in_flds = tuple(df.columns.values)
-    in_vals = []
-    for r in range(df.shape[0]):
-        vals = tuple(df.values[r])
-        in_vals.append(vals)
-    
-    return tuple([in_flds, in_vals])
+#     return tuple([in_flds, in_vals])
 
 
-def check_for_games(game_date, lg):
-    df = fetch.game_logs(game_date, 'T', lg)
-    if not df:
-        print(f'No {lg} games found for {game_date}')
-        return pd.DataFrame()
-    return df
+# def check_for_games(game_date, lg):
+#     df = fetch.game_logs(game_date, 'T', lg)
+#     if not df:
+#         print(f'No {lg} games found for {game_date}')
+#         return pd.DataFrame()
+#     return df
 
-def check_all_lgs(game_date, pl_tm):
-    dfs = []
-    lgs = ['NBA', 'WNBA', 'GNBA']
-    for lg in lgs:
-        df = fetch.game_logs(game_date, player_team=pl_tm, lg=lg)
-        if not df.empty:
-            dfs.append(df)
+# def check_all_lgs(game_date, pl_tm):
+#     dfs = []
+#     lgs = ['NBA', 'WNBA', 'GNBA']
+#     for lg in lgs:
+#         df = fetch.game_logs(game_date, player_team=pl_tm, lg=lg)
+#         if not df.empty:
+#             dfs.append(df)
         
-    return dfs
+#     return dfs
 
 def main():
     timeout = 2
     attempt = 0
     max_attempts = 3
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
+    
+    fetch.game_logs_batch(['05/01/2025', '05/20/2025'])
+    
+    # tdf = run.get_game_logs(game_date, 'T')
+    # tm_data = clean.TeamData(tdf)
+    # # run.inserts(tm_data.table_dfs)
+    
+    # pdf = run.get_game_logs(game_date, 'P')
+    # pl_data = clean.PlayerData(pdf, tm_data.tgame_df)
+    # # run.inserts(pl_data.table_dfs)
+    
+    # all_table_data = tm_data.table_dfs + pl_data.table_dfs
+    # print(all_table_data)
+    
+    # run.inserts(all_table_data)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     #game_date = '03/06/2025'
     
     # CONFIRMED THIS WORKS 05/24 - INSERT TRIGGERS STORED PROCEDURE TO UPDATE PLAYER TABLE
@@ -48,25 +71,27 @@ def main():
     # db_conn.insert('player_temp', pl_ins_lists[0], pl_ins_lists[1])
     
     # get the raw team game logs for each league
-    tm_dfs = check_all_lgs(game_date, 'T')
-    if not tm_dfs:
-        print(f'No games played in any league on {game_date}')
-        print('Exiting...')
-        return # exit the program    
+    # tm_dfs = run.check_all_lgs(game_date, 'T')
+    # if not tm_dfs:
+    #     print(f'No games played in any league on {game_date}')
+    #     print('Exiting...')
+    #     return # exit the program    
     
-    # combine the dataframes
-    all_tm_logs = pd.concat(tm_dfs.copy()).reset_index(drop=True)
+    # # combine the dataframes
+    # all_tm_logs = pd.concat(tm_dfs.copy()).reset_index(drop=True)
     
-    print(f'Cleaned DF of all game logs (NBA/WNBA/GLEAGUE) from {game_date}')
-    # print(all_tm_logs)
+    # all_tm_logs = run.get_team_logs(game_date)
     
-    # if games exist for any of the leagues, pass it to TeamData class
-    all_team_data = clean.TeamData(all_tm_logs)
-    print(all_team_data.game_df)
+    # print(f'Cleaned DF of all game logs (NBA/WNBA/GLEAGUE) from {game_date}')
+    # # print(all_tm_logs)
     
-    ins_game_lists = df_to_insert_lists(all_team_data.game_df)
-    db_conn = conn.DBConn('dev')
-    db_conn.insert('game', ins_game_lists[0], ins_game_lists[1])
+    # # if games exist for any of the leagues, pass it to TeamData class
+    # all_team_data = clean.TeamData(all_tm_logs)
+    # print(all_team_data.game_df)
+    
+    # ins_game_lists = df_to_insert_lists(all_team_data.game_df)
+    # db_conn = conn.DBConn('dev')
+    # db_conn.insert('game', ins_game_lists[0], ins_game_lists[1])
     
     # print(all_team_data.team_df)
     
@@ -137,7 +162,7 @@ def main():
     
 
     # only return for testing purposes
-    return
+    # return
 
 if __name__=='__main__':
     main()
