@@ -40,7 +40,11 @@ def list_of_dates(dates):
     return game_dates
     
 def game_logs_batch(dates, player_team='P'):
-    game_dates = list_of_dates(dates)
+    if len(dates) > 1:
+        game_dates = list_of_dates(dates)
+    else:
+        game_dates = dates
+        
     dfs = []
     for i, date in enumerate(game_dates):
         
@@ -52,7 +56,7 @@ def game_logs_batch(dates, player_team='P'):
         
         dfs.append(df)
         # print(df)
-        if (i+1) % 10 == 0:
+        if (i+1) < len(game_dates) and (i+1) % 10 == 0:
             delay = 20
             logs.append_log(f'Fetched date {i+1} of {len(game_dates)} - intentional {delay} second delay to respect rate limiting...')
         else:

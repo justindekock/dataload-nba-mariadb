@@ -68,7 +68,6 @@ def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
     
 # convert start and end date in 01/01/2025 format to list of dates
 
-            
 def main():
     players = get_players()
     # print(players)

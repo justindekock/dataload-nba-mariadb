@@ -5,9 +5,15 @@ import logs
 
 def main():
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    dates = ['10/10/2024', '11/30/2024']
+    # dates = ['05/25/2024', '05/31/2024']
+    dates = [game_date]
     
-    logs.append_log(f'Attempting to fetch and load game logs from {dates[0]} through {dates[1]}...')
+    logmsg = f"Fetching and inserting NBA/WNBA/G-League game logs: {dates[0]}" 
+    if len(dates) > 1:
+        logmsg += f' through {dates[1]}...'
+    logmsg += '\n'
+    
+    logs.append_log(logmsg)
     
     run.fetch_insert_players('dev')
     
