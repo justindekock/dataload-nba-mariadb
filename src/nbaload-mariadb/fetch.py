@@ -1,9 +1,9 @@
 from time import sleep
-from nba_api.stats.endpoints import leaguegamefinder, commonallplayers, commonplayerinfo,\
-    playerindex, teaminfocommon, playbyplayv3, playerprofilev2
+from nba_api.stats.endpoints import leaguegamefinder, commonallplayers, playbyplayv3
 import pandas as pd
+from datetime import datetime as dt
 
-
+import logs
 
 
 # NEED TO MAKE A DECISION - WHEN PLAYER HAS NEW TEAM, INSERT NEW ROW OR UPDATE CURRENT?
@@ -13,22 +13,38 @@ import pandas as pd
 # 
 def get_players(league='all', current=1): # pass 0 to get all players
     lgs = ['NBA', 'WNBA', 'GNBA']
+    if dt.now().month not in range(5, 11):
+        lgs.remove('WNBA')
+        
+    if dt.now().month in range(7, 9):
+        lgs.remove('NBA')
+        
+    if dt.now().month in range(5, 10):
+        lgs.remove('GNBA')
+        
+    
     if league != 'all':
         lgs = [league]
 
     pls = []
     for lg in lgs:
-        raw = commonallplayers.CommonAllPlayers(is_only_current_season=current, 
-                                                league_id='10' if lg == 'WNBA' \
-                                                    else ('20' if lg == 'GNBA' else '00')
-                                                    ).get_data_frames()[0]    
+        try:
+            raw = commonallplayers.CommonAllPlayers(is_only_current_season=current, 
+                                                    league_id='10' if lg == 'WNBA' \
+                                                        else ('20' if lg == 'GNBA' else '00')
+                                                        ).get_data_frames()[0]    
+            
+            raw['lg'] = lg
+            pl = raw.copy()
+            pl = pl.rename(columns={'PERSON_ID': 'player_id', 'DISPLAY_FIRST_LAST': 'player',
+                                    'TEAM_ID': 'team_id', 'ROSTERSTATUS': 'active'})
+            pl = pl[['player_id', 'player', 'team_id', 'lg', 'active']]
+            pls.append(pl.copy())
+        except Exception as e:
+            logs.append_log(f'ERROR fetching current players: {e}')
+            
         
-        raw['lg'] = lg
-        pl = raw.copy()
-        pl = pl.rename(columns={'PERSON_ID': 'player_id', 'DISPLAY_FIRST_LAST': 'player',
-                                'TEAM_ID': 'team_id', 'ROSTERSTATUS': 'active'})
-        pl = pl[['player_id', 'player', 'team_id', 'lg', 'active']]
-        pls.append(pl.copy())
+        
     return pd.concat(pls)
 
 def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
@@ -45,9 +61,13 @@ def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
             # CRUCIAL -- ADD LG TO THIS DF
             df['lg'] = lg
             
+            logs.append_log(f"{lg} {'team' if player_team == 'T' else 'player'} "
+                f"game logs fetched for {game_date}: {df.shape[0]} rows")
+            
             return df
         except Exception as e:
             print(e)
+            logs.append_log(f'ERROR fetching {lg} game logs for {game_date}: {e}')
             sleep(5)
     
 # convert start and end date in 01/01/2025 format to list of dates

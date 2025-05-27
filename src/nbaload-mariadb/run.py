@@ -1,22 +1,29 @@
 import fetch
-import clean
+import logs
 from time import sleep
 import pandas as pd
 from datetime import datetime, timedelta
 from dbamdb import conn
 
-# db = conn.DBConn('dev')
-# db.delete_temp_player()
-
 def fetch_insert_players(db = 'dev'):
+    logs.append_log('Fetching current players, inserting into player_temp to trigger stored procedure sp_update_players...')
     players = fetch.get_players()
-    pl_ins_lists = df_to_insert_lists(players)
+    if not players.empty:
+        pl_ins_lists = df_to_insert_lists(players)
     
-    db_conn = conn.DBConn(db)
-    db_conn.insert('player_temp', pl_ins_lists[0], pl_ins_lists[1])
-    print('Completed player insert/update, delaying then deleting temporary player records')
-    sleep(5)
-    db_conn.delete_temp_player()
+        db_conn = conn.DBConn(db)
+        ins_res = db_conn.insert('player_temp', pl_ins_lists[0], pl_ins_lists[1])
+        
+        for res in ins_res:
+            logs.append_log(res)
+            
+        logs.append_log('Completed player insert/update, delaying then deleting temporary player records...')
+        
+        sleep(2)
+        
+        del_res = db_conn.delete_temp_player()
+        for res in del_res:
+            logs.append_log(res)
     
 def list_of_dates(dates):
     start_date = datetime.strptime(dates[0], '%m/%d/%Y')
@@ -35,7 +42,7 @@ def list_of_dates(dates):
 def game_logs_batch(dates, player_team='P'):
     game_dates = list_of_dates(dates)
     dfs = []
-    for date in game_dates:
+    for i, date in enumerate(game_dates):
         
         #df = get_game_logs(date, pl_tm=player_team)
         df = check_all_lgs(date, pl_tm=player_team)
@@ -44,8 +51,14 @@ def game_logs_batch(dates, player_team='P'):
             continue
         
         dfs.append(df)
-        print(df)    
-        sleep(2)
+        # print(df)
+        if (i+1) % 15 == 0:
+            delay = 30
+        else:
+            delay = 2
+            
+        print(f'Fetched date {i+1} of {len(game_dates)} - delaying for {delay} seconds...')
+        sleep(delay)
     
     bigdf = pd.concat(dfs).reset_index(drop=True)
     
@@ -84,13 +97,17 @@ def get_game_logs(game_date, pl_tm='T'):
     
 # should move this to clean
 def df_to_insert_lists(df):
-    in_flds = tuple(df.columns.values)
-    in_vals = []
-    for r in range(df.shape[0]):
-        vals = tuple(df.values[r])
-        in_vals.append(vals)
+    in_flds = tuple(df.columns)
+    in_vals = list(map(tuple, df.to_numpy()))
+    # print(in_flds, in_vals)
+    return(in_flds, in_vals)
+    # in_flds = tuple(df.columns.values)
+    # in_vals = []
+    # for r in range(df.shape[0]):
+    #     vals = tuple(df.values[r])
+    #     in_vals.append(vals)
     
-    return tuple([in_flds, in_vals])
+    # return tuple([in_flds, in_vals])
 
 def check_for_games(game_date, lg):
     df = fetch.game_logs(game_date, 'T', lg)
@@ -107,11 +124,14 @@ def inserts(table_dfs):
         table = list(dict.keys())[0]
         df = list(dict.values())[0]
         in_list = df_to_insert_lists(df)
-        print(f'Attempting to insert into {table}...')
-        db.insert(table, in_list[0], in_list[1])
-    
+        logs.append_log(f'Attempting to insert into {table}...')
+        ins_res = db.insert(table, in_list[0], in_list[1])
+        for res in ins_res:
+            logs.append_log(res)
     
 def manual_insert(table, df):
     in_list = df_to_insert_lists(df)
     db = conn.DBConn('dev')
-    db.insert(table, in_list[0], in_list[1])
+    ins_res = db.insert(table, in_list[0], in_list[1])
+    for res in ins_res:
+        logs.append_log(res)

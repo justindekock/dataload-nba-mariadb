@@ -2,26 +2,31 @@ from datetime import datetime, timedelta
 from time import sleep
 import clean
 import run
+import logs
+import os
+from dotenv import load_dotenv
 
 def main():
     timeout = 2
     attempt = 0
     max_attempts = 3
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    dates = ['05/08/2025', '05/15/2025']
+    dates = ['12/01/2024', '12/27/2024']
+    
+    logs.append_log(f'Attempting to fetch and load game logs from {dates[0]} through {dates[1]}...')
     
     run.fetch_insert_players('dev')
     
-    print('Starting team fetch...')
+    logs.append_log('\nStarting team fetch...')
     batch_tm_df = run.game_logs_batch(dates, player_team='T')
     batch_tm_data = clean.TeamData(batch_tm_df)
-    print('Team logs fetched and cleaned, starting DB insert...')
+    logs.append_log('Team logs fetched and cleaned, starting DB insert...')
     run.inserts(batch_tm_data.table_dfs)
     
-    print('Starting player fetch...')
+    logs.append_log('\nStarting player fetch...')
     batch_pl_df = run.game_logs_batch(dates, player_team='P')
     batch_pl_data = clean.PlayerData(batch_pl_df, batch_tm_data.tgame_df)
-    print('Player logs fetched and cleaned, starting DB insert...')
+    logs.append_log('Player logs fetched and cleaned, starting DB insert...')
     run.inserts(batch_pl_data.table_dfs)
     
     
