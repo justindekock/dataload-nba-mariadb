@@ -4,10 +4,64 @@ from datetime import datetime, timedelta
 from math import ceil
 from dbamdb import conn
 import fetch
+import clean
 import logs
 
 def main():
-    chunk_dates(['03/01/2024', '03/28/2025'], size=25)
+    dates = ['08/01/2016', (datetime.today()).strftime('%m/%d/%Y')]
+    run_chunk(chunk_dates(dates, size=30), 'prod')
+    
+def chunk_dates(dates, size):
+    start_date = datetime.strptime(dates[0], '%m/%d/%Y')
+    end_date = datetime.strptime(dates[1], '%m/%d/%Y')
+    days = abs(end_date-start_date).days
+    
+    # split this into a list for every ten days
+    game_dates = []
+    chunks = int(ceil(days/size)) # number of days / 10 rounded up (27 days -> c=3)
+    for c in range(chunks):
+        chunk = [] # create one list to contain a list of each chunk of dates
+        for i in range(size): # now for the num_dts, will create a list of this length with the dates
+            date = ((start_date + timedelta(c * size)) + timedelta(i))
+            if date > end_date:
+                break
+            chunk.append(date.strftime('%m/%d/%Y')) 
+        game_dates.append(chunk)# multiplying the c (current chunk) by the chunk length ensures dates line up
+    return game_dates
+    
+def run_chunk(dates_chunks, db, delay=10):
+    for i, date_chunk in enumerate(dates_chunks):
+        logs.append_log(f'Fetching data from {date_chunk[0]} - {date_chunk[len(date_chunk) - 1]}')
+        print(date_chunk, '\n')
+        tm_df = run_dates_chunk(date_chunk, 'T')
+        pl_df = run_dates_chunk(date_chunk, 'P')
+        team_data = clean.TeamData(tm_df)
+        player_data = clean.PlayerData(pl_df, team_data.tgame_df)
+        table_dfs = (list(team_data.table_dfs) + list(player_data.table_dfs))
+        
+        r = 0
+        for df in table_dfs:
+            r+=list(df.values())[0].shape[0]
+        
+        #.extend(player_data.table_dfs)
+        logs.append_log(f'\n----\nPassing {r} rows from {date_chunk[0]} - {date_chunk[len(date_chunk) - 1]} to insert function...')
+        inserts(db, table_dfs)
+        logs.append_log(f'\nFinished with chunk {i+1} of {len(dates_chunks)} - intentional {delay} second delay...\n')
+        sleep(delay)
+    
+def run_dates_chunk(game_dates, pl_tm, delay=2):
+    dfs = []
+    for i, date in enumerate(game_dates):
+        df = check_all_lgs(date, pl_tm=pl_tm)
+        if df.empty:
+            print(f'Empty dataframe {date}')
+            continue
+        dfs.append(df)
+        print(f'Fetched date {i+1} of {len(game_dates)} - delaying for {delay} seconds...')
+        sleep(delay)
+    bigdf = pd.concat(dfs).reset_index(drop=True)
+
+    return bigdf  
 
 def fetch_insert_players(db = 'dev'):
     logs.append_log('Fetching current players, inserting into player_temp to trigger stored procedure sp_update_players...')
@@ -28,33 +82,8 @@ def fetch_insert_players(db = 'dev'):
         del_res = db_conn.delete_temp_player()
         for res in del_res:
             logs.append_log(res)
-    
-    
-def chunk_dates(dates, size):
-    start_date = datetime.strptime(dates[0], '%m/%d/%Y')
-    end_date = datetime.strptime(dates[1], '%m/%d/%Y')
-    days = abs(end_date-start_date).days
-    
-    # split this into a list for every ten days
-    game_dates = []
-    size = size
-    if days >= size:
-        chunks = int(ceil(days/size)) # number of days / 10 rounded up (27 days -> c=3)
-        for c in range(chunks):
-            chunk = [] # create one list to contain a list of each chunk of dates
-            for i in range(size): # now for the num_dts, will create a list of this length with the dates
-                date = ((start_date + timedelta(c * size)) + timedelta(i))
-                if date > end_date:
-                    break
-                chunk.append(date.strftime('%m/%d/%Y')) 
-            game_dates.append(chunk)# multiplying the c (current chunk) by the chunk length ensures dates line up
             
-        print(len(game_dates))
-        print(game_dates)
-                
-     # append the end date
-    return game_dates
-    
+
 def list_of_dates(dates):
     start_date = datetime.strptime(dates[0], '%m/%d/%Y')
     end_date = datetime.strptime(dates[1], '%m/%d/%Y')
