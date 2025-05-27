@@ -1,9 +1,9 @@
-import fetch
-import logs
 from time import sleep
 import pandas as pd
 from datetime import datetime, timedelta
 from dbamdb import conn
+import fetch
+import logs
 
 def fetch_insert_players(db = 'dev'):
     logs.append_log('Fetching current players, inserting into player_temp to trigger stored procedure sp_update_players...')
@@ -64,9 +64,7 @@ def game_logs_batch(dates, player_team='P'):
             
         print(f'Fetched date {i+1} of {len(game_dates)} - delaying for {delay} seconds...')
         sleep(delay)
-    
     bigdf = pd.concat(dfs).reset_index(drop=True)
-    
     return bigdf
 
 # returns single df with all games for one date for all leagues
@@ -88,6 +86,12 @@ def check_all_lgs(game_date, pl_tm):
         return bigdf
     return pd.DataFrame()
 
+# convert df to lists for executemany
+def df_to_insert_lists(df):
+    in_flds = tuple(df.columns)
+    in_vals = list(map(tuple, df.to_numpy()))
+    return(in_flds, in_vals)
+
 def get_game_logs(game_date, pl_tm='T'):
     dfs = check_all_lgs(game_date, pl_tm)
     if not dfs:
@@ -97,34 +101,9 @@ def get_game_logs(game_date, pl_tm='T'):
     
     # combine the dataframes
     return pd.concat(dfs.copy()).reset_index(drop=True)
-
-
-    
-# should move this to clean
-def df_to_insert_lists(df):
-    in_flds = tuple(df.columns)
-    in_vals = list(map(tuple, df.to_numpy()))
-    # print(in_flds, in_vals)
-    return(in_flds, in_vals)
-    # in_flds = tuple(df.columns.values)
-    # in_vals = []
-    # for r in range(df.shape[0]):
-    #     vals = tuple(df.values[r])
-    #     in_vals.append(vals)
-    
-    # return tuple([in_flds, in_vals])
-
-def check_for_games(game_date, lg):
-    df = fetch.game_logs(game_date, 'T', lg)
-    if not df:
-        print(f'No {lg} games found for {game_date}')
-        return# pd.DataFrame()
-    return df
     
 def inserts(table_dfs):
-    
     db = conn.DBConn('dev')
-    
     for dict in table_dfs:
         table = list(dict.keys())[0]
         df = list(dict.values())[0]

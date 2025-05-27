@@ -1,12 +1,10 @@
 import pandas as pd
 
-# fetch the data in main, pass to these classes to clean
 # used in both classes
 def clean_raw_df(df):
     df.columns = [col.lower() for col in df.columns]
     df = df.rename(columns={'team_abbreviation': 'team', 'min': 'mins', 'plus_minus': 'pm'})
-    df = df.infer_objects(copy=False).fillna(0)
-    
+    df = df.infer_objects(copy=False).fillna(0)    
     return df
 
 def get_ot(mins):
@@ -14,8 +12,6 @@ def get_ot(mins):
 
 def get_loc(matchup):
     return 'A' if matchup[4] == '@' else 'H'
-
-# WORKING RECOVERY 10:55 PM 05/21/2025
 
 class TeamData:
     def __init__(self, raw_df):
@@ -33,14 +29,12 @@ class TeamData:
             self.tgame_df = self.get_tgame_df()
             self.tbox_df = self.get_tbox_df()
             self.tshtg_df = self.get_tshtg_df()
-            self.print_dfs()
-            
+            # self.print_dfs()
         
     def print_dfs(self):
         for i, df in enumerate(self.table_dfs):
             print(f'DF {i+1} of {len(self.table_dfs)}')
             print(df)
-        
         
     def get_team_df(self):
         team_df = self.clean_df[['team_id', 'team', 'team_name', 'lg']].drop_duplicates()

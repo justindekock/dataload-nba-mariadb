@@ -2,7 +2,6 @@ from time import sleep
 from nba_api.stats.endpoints import leaguegamefinder, commonallplayers, playbyplayv3
 import pandas as pd
 from datetime import datetime as dt
-
 import logs
 
 # TODO - play by play data with playbyplayv3
@@ -17,7 +16,6 @@ def get_players(league='all', current=1): # pass 0 to get all players
         
     if dt.now().month in range(5, 10):
         lgs.remove('GNBA')
-        
     
     if league != 'all':
         lgs = [league]

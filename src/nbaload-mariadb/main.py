@@ -5,8 +5,8 @@ import logs
 
 def main():
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    # dates = ['05/25/2024', '05/31/2024']
-    dates = [game_date]
+    dates = ['05/01/2024', '05/24/2024']
+    # dates = [game_date]
     
     logmsg = f"Fetching and inserting NBA/WNBA/G-League game logs: {dates[0]}" 
     if len(dates) > 1:
