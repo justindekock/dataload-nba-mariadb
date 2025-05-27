@@ -102,8 +102,8 @@ def get_game_logs(game_date, pl_tm='T'):
     # combine the dataframes
     return pd.concat(dfs.copy()).reset_index(drop=True)
     
-def inserts(table_dfs):
-    db = conn.DBConn('dev')
+def inserts(db, table_dfs):
+    db = conn.DBConn(db)
     for dict in table_dfs:
         table = list(dict.keys())[0]
         df = list(dict.values())[0]
