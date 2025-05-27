@@ -19,7 +19,7 @@ def fetch_insert_players(db = 'dev'):
             
         logs.append_log('Completed player insert/update, delaying then deleting temporary player records...')
         
-        sleep(2)
+        sleep(1)
         
         del_res = db_conn.delete_temp_player()
         for res in del_res:
@@ -52,10 +52,11 @@ def game_logs_batch(dates, player_team='P'):
         
         dfs.append(df)
         # print(df)
-        if (i+1) % 15 == 0:
-            delay = 30
+        if (i+1) % 10 == 0:
+            delay = 20
+            logs.append_log(f'Fetched date {i+1} of {len(game_dates)} - intentional {delay} second delay to respect rate limiting...')
         else:
-            delay = 2
+            delay = 1
             
         print(f'Fetched date {i+1} of {len(game_dates)} - delaying for {delay} seconds...')
         sleep(delay)

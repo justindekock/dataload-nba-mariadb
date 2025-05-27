@@ -1,5 +1,7 @@
 Upon execution this project fetches game logs from the nba_api package, cleans the data, and uses my dba-mariadb package to insert the data into a mariadb server hosted locally on a raspberry pi 5. 
 
+dba-mariadb REPO: https://github.com/justindekock/dba-mariadb.git
+
 MODULES: 
 
 - fetch.py - uses the nba_api package to call the nba stats website and fetch data

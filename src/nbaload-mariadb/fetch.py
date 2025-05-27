@@ -5,12 +5,8 @@ from datetime import datetime as dt
 
 import logs
 
+# TODO - play by play data with playbyplayv3
 
-# NEED TO MAKE A DECISION - WHEN PLAYER HAS NEW TEAM, INSERT NEW ROW OR UPDATE CURRENT?
-# TODO - IDENTIFY PLAYER ROWS THAT NEED TO BE UPDATED: 
-# -- IF PLAYER EXISTS IN DB BUT TEAM, ACTIVE, OR LG IS DIFFERENT IN FETCH (NBA/GLEAGUE)
-# -- -- UPDATE THE CURRENT ACTIVE FIELD TO 0. THEN INSERT THE NEW RECORD
-# 
 def get_players(league='all', current=1): # pass 0 to get all players
     lgs = ['NBA', 'WNBA', 'GNBA']
     if dt.now().month not in range(5, 11):

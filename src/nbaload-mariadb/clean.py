@@ -1,5 +1,4 @@
 import pandas as pd
-import fetch
 
 # fetch the data in main, pass to these classes to clean
 # used in both classes
