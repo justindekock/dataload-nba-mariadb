@@ -7,8 +7,8 @@ def main():
     db = 'prod'
     
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    # dates = ['05/01/2024', '05/24/2024']
-    dates = [game_date]
+    dates = ['10/22/2024', game_date] # testing with entirity of 2425 season
+    # dates = [game_date]
     
     logmsg = f"Fetching and inserting NBA/WNBA/G-League game logs: {dates[0]}" 
     if len(dates) > 1:

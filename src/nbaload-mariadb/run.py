@@ -57,10 +57,12 @@ def game_logs_batch(dates, player_team='P'):
         dfs.append(df)
         # print(df)
         if (i+1) < len(game_dates) and (i+1) % 10 == 0:
-            delay = 20
+            if (i+1) % 50 == 0:
+                delay = 60
+            delay = 30
             logs.append_log(f'Fetched date {i+1} of {len(game_dates)} - intentional {delay} second delay to respect rate limiting...')
         else:
-            delay = 1
+            delay = 2
             
         print(f'Fetched date {i+1} of {len(game_dates)} - delaying for {delay} seconds...')
         sleep(delay)
