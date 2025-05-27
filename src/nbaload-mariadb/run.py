@@ -1,9 +1,13 @@
 from time import sleep
 import pandas as pd
 from datetime import datetime, timedelta
+from math import ceil
 from dbamdb import conn
 import fetch
 import logs
+
+def main():
+    chunk_dates(['03/01/2024', '03/28/2025'], size=25)
 
 def fetch_insert_players(db = 'dev'):
     logs.append_log('Fetching current players, inserting into player_temp to trigger stored procedure sp_update_players...')
@@ -25,11 +29,38 @@ def fetch_insert_players(db = 'dev'):
         for res in del_res:
             logs.append_log(res)
     
+    
+def chunk_dates(dates, size):
+    start_date = datetime.strptime(dates[0], '%m/%d/%Y')
+    end_date = datetime.strptime(dates[1], '%m/%d/%Y')
+    days = abs(end_date-start_date).days
+    
+    # split this into a list for every ten days
+    game_dates = []
+    size = size
+    if days >= size:
+        chunks = int(ceil(days/size)) # number of days / 10 rounded up (27 days -> c=3)
+        for c in range(chunks):
+            chunk = [] # create one list to contain a list of each chunk of dates
+            for i in range(size): # now for the num_dts, will create a list of this length with the dates
+                date = ((start_date + timedelta(c * size)) + timedelta(i))
+                if date > end_date:
+                    break
+                chunk.append(date.strftime('%m/%d/%Y')) 
+            game_dates.append(chunk)# multiplying the c (current chunk) by the chunk length ensures dates line up
+            
+        print(len(game_dates))
+        print(game_dates)
+                
+     # append the end date
+    return game_dates
+    
 def list_of_dates(dates):
     start_date = datetime.strptime(dates[0], '%m/%d/%Y')
     end_date = datetime.strptime(dates[1], '%m/%d/%Y')
     days = abs(end_date-start_date).days
     
+    # split this into a list for every ten days
     game_dates = []
     
     for i in range(days):
@@ -39,6 +70,7 @@ def list_of_dates(dates):
     game_dates.append(dates[1]) # append the end date
     return game_dates
     
+# TODO - possible to split this up so every say 10 days it cleans the data and isnerts then moves to the next 10 days
 def game_logs_batch(dates, player_team='P'):
     if len(dates) > 1:
         game_dates = list_of_dates(dates)
@@ -81,7 +113,7 @@ def check_all_lgs(game_date, pl_tm):
             print(f'Empty dataframe {lg}: {game_date}')
             continue
         dfs.append(df)
-        sleep(2) # 3 second timeout between each league fetch
+        sleep(1) # 3 second timeout between each league fetch
     
     if dfs:
         bigdf = pd.concat(dfs).reset_index(drop=True)
@@ -121,3 +153,6 @@ def manual_insert(table, df):
     ins_res = db.insert(table, in_list[0], in_list[1])
     for res in ins_res:
         logs.append_log(res)
+        
+if __name__=='__main__':
+    main()

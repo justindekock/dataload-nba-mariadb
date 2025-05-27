@@ -62,7 +62,7 @@ def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
         except Exception as e:
             print(e)
             logs.append_log(f'ERROR fetching {lg} game logs for {game_date}: {e}')
-            sleep(5)
+            sleep(45) # timeout needs to be at least 30
     
 # convert start and end date in 01/01/2025 format to list of dates
 
