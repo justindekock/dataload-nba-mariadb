@@ -9,7 +9,7 @@ delay = 2
 db = 'prod'
 
 def main():
-    dates = ['10/10/2008', '10/09/2009']#(datetime.today()).strftime('%m/%d/%Y')]
+    dates = ['10/10/2000', '10/09/2008']#(datetime.today()).strftime('%m/%d/%Y')]
     
     start_msg = f'Beginning batch fetch for data from {dates[0]} - {dates[1]}....'
     logs.log_print(start_msg)

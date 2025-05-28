@@ -82,9 +82,10 @@ def check_all_lgs(game_date, game_date_to=None, pl_tm='T'):
         dfs.append(df)
         sleep(1) # 3 second timeout between each league fetch
     
-    if dfs:
+    if len(dfs) > 0:
         bigdf = pd.concat(dfs).reset_index(drop=True)
         return bigdf
+    print(len(df))
     return pd.DataFrame()
 
 def fetch_insert_players(db = 'dev'):
