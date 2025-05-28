@@ -3,33 +3,30 @@ import clean
 import run
 import logs
 
+db = 'prod'
+
 def main():
-    db = 'prod'
     
     game_date = (datetime.today() - timedelta(1)).strftime('%m/%d/%Y')
-    # dates = ['03/01/2025', game_date] # testing with entirity of 2425 season
-    dates = [game_date]
     
-    logmsg = f"Fetching and inserting NBA/WNBA/G-League game logs: {dates[0]}" 
-    if len(dates) > 1:
-        logmsg += f' through {dates[1]}...'
-    logmsg += '\n'
+    logmsg = f'Fetching and inserting NBA/WNBA/G-League game logs: {game_date}\n' 
+    logs.log_print(logmsg)
     
-    logs.append_log(logmsg)
-    
+    logs.append_log(f'Fetching current players first...')
     run.fetch_insert_players(db)
+        
+    tm_df = run.check_all_lgs(game_date, pl_tm='T')
+    if tm_df.empty:
+        logs.log_print(f'No logs found for {game_date}, exiting...', brk=True)
+        return # no logs, exit
+    pl_df = run.check_all_lgs(game_date, pl_tm='P')
+    team_data = clean.TeamData(tm_df)
+    player_data = clean.PlayerData(pl_df, team_data.tgame_df)
+    table_dfs = (list(team_data.table_dfs) + list(player_data.table_dfs))
     
-    logs.append_log('\nStarting team fetch...')
-    batch_tm_df = run.game_logs_batch(dates, player_team='T')
-    batch_tm_data = clean.TeamData(batch_tm_df)
     logs.append_log('Team logs fetched and cleaned, starting DB insert...')
-    run.inserts(db, batch_tm_data.table_dfs)
-    
-    logs.append_log('\nStarting player fetch...')
-    batch_pl_df = run.game_logs_batch(dates, player_team='P')
-    batch_pl_data = clean.PlayerData(batch_pl_df, batch_tm_data.tgame_df)
-    logs.append_log('Player logs fetched and cleaned, starting DB insert...')
-    run.inserts(db, batch_pl_data.table_dfs)
+    run.inserts(db, table_dfs)
+    logs.log_print('Script complete!', brk=True)
 
 if __name__=='__main__':
     main()

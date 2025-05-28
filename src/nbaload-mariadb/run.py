@@ -8,8 +8,7 @@ import clean
 import logs
 
 def main():
-    dates = ['08/01/2016', (datetime.today()).strftime('%m/%d/%Y')]
-    run_chunk(chunk_dates(dates, size=30), 'prod')
+    pass
     
 def chunk_dates(dates, size):
     start_date = datetime.strptime(dates[0], '%m/%d/%Y')
@@ -39,6 +38,7 @@ def run_chunk(dates_chunks, db, delay=10):
         player_data = clean.PlayerData(pl_df, team_data.tgame_df)
         table_dfs = (list(team_data.table_dfs) + list(player_data.table_dfs))
         
+        # count all the rows
         r = 0
         for df in table_dfs:
             r+=list(df.values())[0].shape[0]
@@ -49,7 +49,7 @@ def run_chunk(dates_chunks, db, delay=10):
         logs.append_log(f'\nFinished with chunk {i+1} of {len(dates_chunks)} - intentional {delay} second delay...\n')
         sleep(delay)
     
-def run_dates_chunk(game_dates, pl_tm, delay=2):
+def run_dates_chunk(game_dates, pl_tm, delay=3):
     dfs = []
     for i, date in enumerate(game_dates):
         df = check_all_lgs(date, pl_tm=pl_tm)
@@ -62,6 +62,30 @@ def run_dates_chunk(game_dates, pl_tm, delay=2):
     bigdf = pd.concat(dfs).reset_index(drop=True)
 
     return bigdf  
+
+
+# returns single df with all games for one date for all leagues
+def check_all_lgs(game_date, game_date_to=None, pl_tm='T'):
+    lgs = ['NBA', 'WNBA', 'GNBA']
+    dfs = []
+    for lg in lgs:
+        # print(game_date)
+        # print(lg)
+        if game_date_to:
+            logs.append_log(f'Fetching {pl_tm} data for {game_date} - {game_date_to}...')
+            
+        df = fetch.game_logs(game_date, game_date_to, player_team=pl_tm, lg=lg)
+        if df.empty:
+            # print(f'Empty dataframe {lg}: {game_date}')
+            logs.append_log(f'No {lg} {pl_tm} data found: {game_date} - {game_date_to}...')
+            continue
+        dfs.append(df)
+        sleep(1) # 3 second timeout between each league fetch
+    
+    if dfs:
+        bigdf = pd.concat(dfs).reset_index(drop=True)
+        return bigdf
+    return pd.DataFrame()
 
 def fetch_insert_players(db = 'dev'):
     logs.append_log('Fetching current players, inserting into player_temp to trigger stored procedure sp_update_players...')
@@ -130,24 +154,6 @@ def game_logs_batch(dates, player_team='P'):
     bigdf = pd.concat(dfs).reset_index(drop=True)
     return bigdf
 
-# returns single df with all games for one date for all leagues
-def check_all_lgs(game_date, pl_tm):
-    lgs = ['NBA', 'WNBA', 'GNBA']
-    dfs = []
-    for lg in lgs:
-        print(game_date)
-        print(lg)
-        df = fetch.game_logs(game_date, player_team=pl_tm, lg=lg)
-        if df.empty:
-            print(f'Empty dataframe {lg}: {game_date}')
-            continue
-        dfs.append(df)
-        sleep(1) # 3 second timeout between each league fetch
-    
-    if dfs:
-        bigdf = pd.concat(dfs).reset_index(drop=True)
-        return bigdf
-    return pd.DataFrame()
 
 # convert df to lists for executemany
 def df_to_insert_lists(df):
@@ -171,7 +177,7 @@ def inserts(db, table_dfs):
         table = list(dict.keys())[0]
         df = list(dict.values())[0]
         in_list = df_to_insert_lists(df)
-        logs.append_log(f'Attempting to insert into {table}...')
+        logs.append_log(f'Attempting to insert {len(in_list[1])} rows into table {table}...')
         ins_res = db.insert(table, in_list[0], in_list[1])
         for res in ins_res:
             logs.append_log(res)

@@ -35,7 +35,7 @@ def get_players(league='all', current=1): # pass 0 to get all players
             pl = pl[['player_id', 'player', 'team_id', 'lg', 'active']]
             pls.append(pl.copy())
         except Exception as e:
-            logs.append_log(f'ERROR fetching current players: {e}')
+            logs.append_log(f'ERROR fetching current players:\n********** {e}')
             
         
         
@@ -55,13 +55,12 @@ def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
             # CRUCIAL -- ADD LG TO THIS DF
             df['lg'] = lg
             
-            logs.append_log(f"{lg} {'team' if player_team == 'T' else 'player'} "
-                f"game logs fetched for {game_date}: {df.shape[0]} rows")
-            
+            logs.append_log(f" "
+                f"{df.shape[0]} {lg} {'team' if player_team == 'T' else 'player'} rows fetched for {game_date} - {game_date_to}")
             return df
         except Exception as e:
             print(e)
-            logs.append_log(f'ERROR fetching {lg} game logs for {game_date}: {e}')
+            logs.append_log(f'ERROR fetching {lg} game logs for {game_date}:\n*********** {e}')
             sleep(45) # timeout needs to be at least 30
     
 # convert start and end date in 01/01/2025 format to list of dates

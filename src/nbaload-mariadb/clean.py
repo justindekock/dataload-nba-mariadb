@@ -59,13 +59,25 @@ class TeamData:
             stypes = {
                 1: ['PRE', 'Pre Season'], 2: ['RS', 'Regular Season'], 
                 3: ['AS', 'All Star Week'], 4: ['PO', 'Playoffs'], 
-                5: ['PI', 'Play-In Tournament'], 6: ['NC', 'NBA Cup']
+                5: ['PI', 'Play-In Tournament'], 6: ['NC', 'NBA Cup'],
+                7: ['MI', 'Miscellaneous']
             }      
             
-            season.append(f'{year1}-{year2}-{stypes[stype][0]}')
-            season_desc.append(f'{year1}-{year2} {stypes[stype][1]}')
-            wseason.append(f'{year1}-{stypes[stype][0]}')
-            wseason_desc.append(f'{year1} WNBA {stypes[stype][1]}')
+            # default to miscellaneous when id not in the defined seasons
+            szn = stypes[stype][0] if stype in stypes else stypes[7][0]
+            szn_desc = stypes[stype][1] if stype in stypes else stypes[7][1]
+            
+            season.append(f'{year1}-{year2}-{szn}')
+            season_desc.append(f'{year1}-{year2} {szn_desc}')
+            wseason.append(f'{year1}-{szn}')
+            wseason_desc.append(f'{year1} WNBA {szn_desc}')
+            
+            # season.append(f'{year1}-{year2}-{stypes[stype][0]}')
+            # season_desc.append(f'{year1}-{year2} {stypes[stype][1]}')
+            # wseason.append(f'{year1}-{stypes[stype][0]}')
+            # wseason_desc.append(f'{year1} WNBA {stypes[stype][1]}')
+                
+                
             
         # return a dataframe with the lists as columns
         szn_df = pd.DataFrame(
@@ -76,7 +88,7 @@ class TeamData:
         return szn_df
     
     def get_game_df(self):
-        df = self.clean_df
+        df = self.clean_df.drop_duplicates(subset=['game_id', 'team_id'])
         def get_final_scores(df): # adds a formatted final score column
             final_scores = df.pivot(index='game_id', columns='team', values='pts')
         
