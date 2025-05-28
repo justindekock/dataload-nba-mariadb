@@ -3,6 +3,7 @@ from nba_api.stats.endpoints import leaguegamefinder, commonallplayers, playbypl
 import pandas as pd
 from datetime import datetime as dt
 import logs
+import nba_api.stats.library.http as nba
 
 # TODO - play by play data with playbyplayv3
 
@@ -42,8 +43,8 @@ def get_players(league='all', current=1): # pass 0 to get all players
     return pd.concat(pls)
 
 def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
-    retries = 0
-    while retries < 3:
+    attempt = 0
+    while attempt < 5:
         try:
             df = leaguegamefinder.LeagueGameFinder(
                 player_or_team_abbreviation=player_team,
@@ -58,10 +59,12 @@ def game_logs(game_date, game_date_to=None, player_team = 'P', lg = 'NBA'):
             logs.append_log(f" "
                 f"{df.shape[0]} {lg} {'team' if player_team == 'T' else 'player'} rows fetched for {game_date} - {game_date_to}")
             return df
+        
         except Exception as e:
             print(e)
-            logs.append_log(f'ERROR fetching {lg} game logs for {game_date}:\n*********** {e}')
-            sleep(45) # timeout needs to be at least 30
+            logs.log_print(f'ERROR fetching {lg} game logs for {game_date} after {attempt + 1} attempts...:\n*********** {e}\nIntentionally delaying for 5 minutes...')
+            sleep(300) # timeout for 5 minutes just to be safe
+            attempt+=1
     
 # convert start and end date in 01/01/2025 format to list of dates
 

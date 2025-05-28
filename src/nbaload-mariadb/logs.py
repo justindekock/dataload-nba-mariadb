@@ -12,8 +12,6 @@ def append_log(msg, brk=False):
             f.write('\n')
         f.write(f"{dt.now().strftime('%H:%M:%S')} ---------- {msg}\n")
         
-        
-        
 def log_print(msg, brk=False):
     print(msg)
     append_log(msg, brk)
