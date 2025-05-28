@@ -1,6 +1,6 @@
 from time import sleep
 from datetime import datetime, timedelta
-from math import ceil
+from math import ceil, floor
 from run import check_all_lgs, inserts
 import clean
 import logs
@@ -9,7 +9,7 @@ delay = 2
 db = 'prod'
 
 def main():
-    dates = ['10/10/2006', '10/09/2008']#(datetime.today()).strftime('%m/%d/%Y')]
+    dates = ['10/10/2023', (datetime.today()).strftime('%m/%d/%Y')]
     
     start_msg = f'Beginning batch fetch for data from {dates[0]} - {dates[1]}....'
     logs.log_print(start_msg)
@@ -32,7 +32,7 @@ def main():
         logs.log_print(f'{r} total rows fetched from {c[0]} - {c[len(c) - 1]}...', brk=True)
         inserts(db, table_dfs)
         
-        dt = (delay * 15) if (i+1) % (len(gdates) / 4) == 0 else delay
+        dt = (delay * 15) if floor((i+1) % (len(gdates) / 4)) == 0 else delay
         logs.log_print(f'Finished with dates {c[0]} - {c[len(c) - 1]} - intentional {dt} second delay...\n', brk=True)
         sleep(dt)
         
