@@ -85,7 +85,6 @@ def check_all_lgs(game_date, game_date_to=None, pl_tm='T'):
     if len(dfs) > 0:
         bigdf = pd.concat(dfs).reset_index(drop=True)
         return bigdf
-    print(len(df))
     return pd.DataFrame()
 
 def fetch_insert_players(db = 'dev'):
